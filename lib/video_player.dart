@@ -1,3 +1,4 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -19,12 +20,14 @@ class VideoApp extends StatefulWidget {
 
 class _VideoAppState extends State<VideoApp> {
   late VideoPlayerController _controller;
-
+  ChewieController? chewieController;
   int position = 0;
 
   final List<Notes> notes = [];
 
   String currentNote = "";
+
+  bool isInitialsed = false;
 
   @override
   void initState() {
@@ -32,12 +35,26 @@ class _VideoAppState extends State<VideoApp> {
     _controller = VideoPlayerController.network(
       'https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_2mb.mp4',
     )..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        chewieController = ChewieController(
+          videoPlayerController: _controller,
+          autoPlay: true,
+          looping: false,
+          showControlsOnInitialize: false,
+          allowPlaybackSpeedChanging: false,
+          allowFullScreen: false,
+        );
+
         setState(() {
-          _controller.setLooping(false);
-          _controller.play();
+          isInitialsed = true;
         });
+
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        // setState(() {
+        //   // _controller.setLooping(false);
+        //   // _controller.play();
+        // });
       });
+
     _controller.addListener(() {
       if (_controller.value.isInitialized &&
           _controller.value.duration.inSeconds ==
@@ -82,42 +99,34 @@ class _VideoAppState extends State<VideoApp> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 28.0),
-                child: _controller.value.isInitialized
-                    ? GestureDetector(
-                        onTap: () {
-                          if (_controller.value.isPlaying) {
-                            setState(() {
-                              _controller.pause();
-                            });
-                          } else {
-                            setState(() {
-                              print("trying to play video...");
-                              _controller.play();
-                            });
-                          }
-                        },
+                child: isInitialsed
+                    ? AspectRatio(
+                        aspectRatio: _controller.value.aspectRatio,
                         child: Stack(
                           children: [
-                            AspectRatio(
-                              aspectRatio: _controller.value.aspectRatio,
-                              child: VideoPlayer(_controller),
+                            Chewie(controller: chewieController!),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  currentNote = "";
+                                  _controller.play();
+                                });
+                              },
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 45.0),
+                                  child: Text(
+                                    "$currentNote",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 22),
+                                  ),
+                                ),
+                              ),
                             ),
-                            Positioned.fill(
-                              child: _controller.value.isBuffering
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        CircularProgressIndicator(),
-                                      ],
-                                    )
-                                  : !_controller.value.isPlaying
-                                      ? Icon(
-                                          Icons.play_arrow,
-                                          color: Colors.white,
-                                        )
-                                      : Container(),
-                            )
                           ],
                         ),
                       )
@@ -144,8 +153,7 @@ class _VideoAppState extends State<VideoApp> {
                       }
                     }
 
-                    return Text(
-                        "Time  ${value.position.inMinutes.toString()} : ${value.position.inSeconds.toString()}",
+                    return Text("",
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
@@ -153,52 +161,34 @@ class _VideoAppState extends State<VideoApp> {
                   },
                 ),
               ),
-              Container(
-                width: double.infinity,
-                child: Column(
-                  children: [
-                    Card(
-                      color: Colors.deepPurple,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)),
-                      child: TextButton(
-                          onPressed: () async {
-                            await Navigator.push<void>(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (BuildContext context) => AddNotes(
-                                  category: widget.category,
-                                  position: position,
+              isInitialsed
+                  ? Container(
+                      width: double.infinity,
+                      child: Card(
+                        color: Colors.deepPurple,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        child: TextButton(
+                            onPressed: () async {
+                              await Navigator.push<void>(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) => AddNotes(
+                                    category: widget.category,
+                                    position: position,
+                                  ),
                                 ),
-                              ),
-                            );
-                            getAllNotes();
-                          },
-                          child: Text("Add Note",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18))),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    currentNote = "";
-                    _controller.play();
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 18.0),
-                  child: Text("$currentNote",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 22)),
-                ),
-              )
+                              );
+                              getAllNotes();
+                            },
+                            child: Text("Add Note",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18))),
+                      ),
+                    )
+                  : Container(),
             ],
           ),
         ],

@@ -32,6 +32,7 @@ dependencies:
   google_fonts: ^2.1.0
   animated_text_kit: ^4.2.1
   lottie: ^1.0.1
+  chewie: ^1.0.0
   video_player: ^2.1.1
   path_provider: ^2.0.1
   percent_indicator: ^3.0.1

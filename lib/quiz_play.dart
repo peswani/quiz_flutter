@@ -200,9 +200,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       );
       Navigator.pop(context);
     }
-    if (isCorrect) {
-      await startNewQuestion();
-    }
+
+    await startNewQuestion();
   }
 
   @override
@@ -302,7 +301,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                   OptionWidget(
                                     index: 0,
                                     quickCall: (index, isRight) {
-                                      if (isRight && index == 0) {
+                                      if (index == 0) {
                                         setState(() {
                                           _timer?.cancel();
                                           index2Vis = false;
@@ -320,7 +319,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                   ),
                                   OptionWidget(
                                       quickCall: (index, isRight) {
-                                        if (isRight && index == 1) {
+                                        if (index == 1) {
                                           setState(() {
                                             _timer?.cancel();
                                             index0Vis = false;
@@ -330,7 +329,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                           });
                                         }
                                       },
-                                      isVisible: index2Vis,
+                                      isVisible: index1Vis,
                                       index: 1,
                                       question: questions[questionPosition],
                                       back: (isCorrect) {
@@ -347,7 +346,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                     OptionWidget(
                                         index: 2,
                                         quickCall: (index, isRight) {
-                                          if (isRight && index == 2) {
+                                          if (index == 2) {
                                             setState(() {
                                               _timer?.cancel();
                                               index0Vis = false;
@@ -364,7 +363,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                         }),
                                     OptionWidget(
                                         quickCall: (index, isRight) {
-                                          if (isRight && index == 3) {
+                                          if (index == 3) {
                                             setState(() {
                                               _timer?.cancel();
                                               index0Vis = false;

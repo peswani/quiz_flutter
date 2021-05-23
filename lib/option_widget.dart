@@ -44,7 +44,6 @@ class _OptionWidgetState extends State<OptionWidget>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     if (widget.index == 1) {
@@ -125,36 +124,38 @@ class _OptionWidgetState extends State<OptionWidget>
                       isCorrectAnswer = true;
                     });
                   } else {
-                    isCorrectAnswer = false;
+                    setState(() {
+                      isCorrectAnswer = false;
+                    });
                   }
                   flipKey.currentState!.toggleCard();
-                  if (isRight) {
-                    Future.delayed(Duration(seconds: 1), () {
-                      setState(() {
-                        showImage = false;
-                      });
-                      _zoomOutController.forward().whenComplete(() {
-                        widget.back?.call(isRight);
+                  // if (isRight) {
+                  Future.delayed(Duration(seconds: 1), () {
+                    setState(() {
+                      showImage = false;
+                    });
+                    _zoomOutController.forward().whenComplete(() {
+                      widget.back?.call(isRight);
 
-                        Future.delayed(Duration(seconds: 3), () {
-                          flipKey.currentState!.toggleCard();
-                          _animationController.reset();
-                          _zoomOutController.reset();
+                      Future.delayed(Duration(seconds: 3), () {
+                        flipKey.currentState!.toggleCard();
+                        _animationController.reset();
+                        _zoomOutController.reset();
 
-                          setState(() {
-                            showImage = true;
-                          });
+                        setState(() {
+                          showImage = true;
                         });
                       });
                     });
-                  } else {
-                    widget.back?.call(isRight);
-                    Future.delayed(Duration(seconds: 1), () {
-                      flipKey.currentState!.toggleCard();
-                      _animationController.reset();
-                      _zoomOutController.reset();
-                    });
-                  }
+                  });
+                  // } else {
+                  //   widget.back?.call(isRight);
+                  //   Future.delayed(Duration(seconds: 1), () {
+                  //     flipKey.currentState!.toggleCard();
+                  //     _animationController.reset();
+                  //     _zoomOutController.reset();
+                  //   });
+                  // }
                 });
               },
               child: Container(

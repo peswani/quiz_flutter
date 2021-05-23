@@ -69,11 +69,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
         } else {
           timeTaken = timeTaken + 1;
 
-          if (mounted) {
-            setState(() {
-              _start--;
-            });
-          }
+          Future.delayed(Duration.zero, () {
+            if (mounted) {
+              setState(() {
+                _start--;
+              });
+            }
+          });
         }
       },
     );
@@ -206,11 +208,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    _controller.removeListener(() {});
-    _controller.dispose();
     _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

@@ -43,31 +43,22 @@ class _VideoAppState extends State<VideoApp> {
           allowPlaybackSpeedChanging: false,
           allowFullScreen: false,
         );
-
         setState(() {
           isInitialsed = true;
         });
-
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        // setState(() {
-        //   // _controller.setLooping(false);
-        //   // _controller.play();
-        // });
       });
 
     _controller.addListener(() {
       if (_controller.value.isInitialized &&
           _controller.value.duration.inSeconds ==
               _controller.value.position.inSeconds) {
-        Navigator.pop(context);
-        Navigator.push<void>(
-          context,
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => QuizScreen(
-              category: widget.category,
-            ),
-          ),
-        );
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => QuizScreen(
+                category: widget.category,
+              ),
+            ));
       }
     });
     getAllNotes();
@@ -122,7 +113,7 @@ class _VideoAppState extends State<VideoApp> {
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 22),
+                                        fontSize: 18),
                                   ),
                                 ),
                               ),
@@ -170,6 +161,7 @@ class _VideoAppState extends State<VideoApp> {
                             borderRadius: BorderRadius.circular(20.0)),
                         child: TextButton(
                             onPressed: () async {
+                              chewieController?.pause();
                               await Navigator.push<void>(
                                 context,
                                 MaterialPageRoute<void>(
@@ -180,6 +172,7 @@ class _VideoAppState extends State<VideoApp> {
                                 ),
                               );
                               getAllNotes();
+                              chewieController!.play();
                             },
                             child: Text("Add Note",
                                 style: TextStyle(
@@ -198,7 +191,8 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    chewieController?.dispose();
+    super.dispose();
   }
 }

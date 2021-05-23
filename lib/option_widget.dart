@@ -199,10 +199,8 @@ class _OptionWidgetState extends State<OptionWidget>
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
     _zoomOutController.dispose();
-    _animationController.removeListener(() {});
     _animationController.dispose();
+    super.dispose();
   }
 }

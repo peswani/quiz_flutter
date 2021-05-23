@@ -40,6 +40,8 @@ class _OptionWidgetState extends State<OptionWidget>
 
   bool isCorrectAnswer = false;
 
+  bool showImage = true;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -94,7 +96,7 @@ class _OptionWidgetState extends State<OptionWidget>
             height: _scaleDownAnimation.value,
             child: Card(
               color: Colors.white,
-              child: _zoomOutController.isAnimating
+              child: !showImage
                   ? Container()
                   : Icon(
                       isCorrectAnswer ? Icons.check : Icons.close,
@@ -128,12 +130,20 @@ class _OptionWidgetState extends State<OptionWidget>
                   flipKey.currentState!.toggleCard();
                   if (isRight) {
                     Future.delayed(Duration(seconds: 1), () {
+                      setState(() {
+                        showImage = false;
+                      });
                       _zoomOutController.forward().whenComplete(() {
                         widget.back?.call(isRight);
+
                         Future.delayed(Duration(seconds: 3), () {
                           flipKey.currentState!.toggleCard();
                           _animationController.reset();
                           _zoomOutController.reset();
+
+                          setState(() {
+                            showImage = true;
+                          });
                         });
                       });
                     });

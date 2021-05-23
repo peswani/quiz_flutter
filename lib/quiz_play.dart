@@ -34,7 +34,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   late Animation _optionsAnimation;
   late Animation _progressAnimation;
   GlobalKey _option2Key = GlobalKey();
-  late Timer _timer;
+  Timer? _timer;
 
   bool _visible = true;
   bool index0Vis = true;
@@ -65,7 +65,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
 
           await startNewQuestion();
 
-          helper.saveScore(questionPosition, 10, 0);
+          helper.saveScore(questionPosition, initialValue, 0);
         } else {
           timeTaken = timeTaken + 1;
 
@@ -80,7 +80,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   }
 
   Future<void> startNewQuestion() async {
-    _timer.cancel();
+    _timer?.cancel();
     setQuestionPosition();
     if (questionPosition >= questions.length) {
       Navigator.push<void>(
@@ -105,16 +105,22 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       index2Vis = true;
       _visible = true;
     });
-    _start = 10;
+    _start = initialValue;
 
     _controller.reset();
 
     _controller.forward();
 
-    Future.delayed(Duration(seconds: 2), () => startTimer());
+    Future.delayed(Duration(seconds: 2), () {
+      if (this.showTimer) {
+        startTimer();
+      }
+    });
   }
 
   int answerIndex = -1;
+
+  bool showTimer = true;
 
   @override
   void initState() {
@@ -122,6 +128,18 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     Future.delayed(Duration.zero, () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       questionPosition = prefs.getInt("pos") ?? 0;
+
+      final time = prefs.getString("timer_time") ?? "10";
+      _start = int.parse(time);
+      initialValue = _start;
+    });
+    Future.delayed(Duration(milliseconds: 300), () async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final showTimer = prefs.getBool("show_timer") ?? true;
+
+      setState(() {
+        this.showTimer = showTimer;
+      });
     });
 
     questions = GenerateQuestions.getQuestions(widget.category);
@@ -149,7 +167,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     });
 
     Future.delayed(Duration(seconds: 3), () {
-      startTimer();
+      if (this.showTimer) {
+        startTimer();
+      }
     });
   }
 
@@ -164,10 +184,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   }
 
   Future<void> answerClicked(int position, bool isCorrect) async {
-    print("time taken : ${10 - _start}");
-    helper.saveScore(questionPosition, 10 - _start, isCorrect ? 1 : 0);
+    print("time taken : ${initialValue - _start}");
+    helper.saveScore(
+        questionPosition, initialValue - _start, isCorrect ? 1 : 0);
     setState(() {
-      _timer.cancel();
+      _timer?.cancel();
     });
 
     if (questionPosition == questions.length - 1) {
@@ -190,7 +211,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
     super.dispose();
     _controller.removeListener(() {});
     _controller.dispose();
-    _timer.cancel();
+    _timer?.cancel();
   }
 
   @override
@@ -215,19 +236,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        startTimer();
-                      },
-                      child: AnimatedOpacity(
-                        opacity: _visible ? 1.0 : 0.0,
-                        duration: Duration(milliseconds: 500),
-                        child: Text("🎉 Oh My Quiz",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: _titleAnimation.value)),
-                      ),
+                    AnimatedOpacity(
+                      opacity: _visible ? 1.0 : 0.0,
+                      duration: Duration(milliseconds: 500),
+                      child: Text("🎉 Oh My Quiz",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: _titleAnimation.value)),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 18.0),
@@ -245,26 +261,33 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                             )),
                       ),
                     ),
-                    Padding(
-                        padding: const EdgeInsets.only(top: 28.0),
-                        child: Opacity(
-                          opacity: _progressAnimation.value,
-                          child: AnimatedOpacity(
-                            opacity: _visible ? 1.0 : 0.0,
-                            duration: Duration(milliseconds: 500),
-                            child: SleekCircularSlider(
-                              appearance: CircularSliderAppearance(
-                                  animationEnabled: true,
-                                  angleRange: 360,
-                                  startAngle: 90,
-                                  customWidths:
-                                      CustomSliderWidths(progressBarWidth: 10)),
-                              min: 0,
-                              max: initialValue.toDouble(),
-                              initialValue: (initialValue - _start).toDouble(),
-                            ),
+                    this.showTimer
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 28.0),
+                            child: Opacity(
+                              opacity: _progressAnimation.value,
+                              child: AnimatedOpacity(
+                                opacity: _visible ? 1.0 : 0.0,
+                                duration: Duration(milliseconds: 500),
+                                child: SleekCircularSlider(
+                                  appearance: CircularSliderAppearance(
+                                      animationEnabled: true,
+                                      angleRange: 360,
+                                      startAngle: 90,
+                                      customWidths: CustomSliderWidths(
+                                          progressBarWidth: 10)),
+                                  min: 0,
+                                  max: initialValue.toDouble(),
+                                  initialValue:
+                                      (initialValue - _start).toDouble(),
+                                ),
+                              ),
+                            ))
+                        : Container(
+                            width: 50,
+                            height: 50,
+                            color: Colors.transparent,
                           ),
-                        )),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(top: 38.0),
@@ -281,7 +304,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                     quickCall: (index, isRight) {
                                       if (isRight && index == 0) {
                                         setState(() {
-                                          _timer.cancel();
+                                          _timer?.cancel();
                                           index2Vis = false;
                                           index1Vis = false;
                                           index3Vis = false;
@@ -299,7 +322,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                       quickCall: (index, isRight) {
                                         if (isRight && index == 1) {
                                           setState(() {
-                                            _timer.cancel();
+                                            _timer?.cancel();
                                             index0Vis = false;
                                             index2Vis = false;
                                             index3Vis = false;
@@ -326,7 +349,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                         quickCall: (index, isRight) {
                                           if (isRight && index == 2) {
                                             setState(() {
-                                              _timer.cancel();
+                                              _timer?.cancel();
                                               index0Vis = false;
                                               index1Vis = false;
                                               index3Vis = false;
@@ -343,7 +366,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                                         quickCall: (index, isRight) {
                                           if (isRight && index == 3) {
                                             setState(() {
-                                              _timer.cancel();
+                                              _timer?.cancel();
                                               index0Vis = false;
                                               index1Vis = false;
                                               index2Vis = false;

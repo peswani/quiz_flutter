@@ -111,7 +111,7 @@ class _AddNotesState extends State<AddNotes> {
 
     if (note.length < 4) {
       setState(() {
-        nameError = "The bank account name must be at least 4 characters";
+        nameError = "Please type at least 4 letter";
       });
       return;
     } else {

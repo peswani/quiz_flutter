@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:quiz_app/quiz_play.dart';
 import 'package:quiz_app/score_screen.dart';
+import 'package:quiz_app/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'colorutil.dart';
@@ -31,7 +32,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -65,11 +65,25 @@ class _MyHomePageState extends State<MyHomePage> {
               repeat: true,
             ),
           ),
+          //
           Positioned.fill(
             child: Padding(
               padding: const EdgeInsets.only(top: 48.0),
               child: Column(
                 children: [
+                  Align(
+                    child: IconButton(
+                        onPressed: () {
+                          Navigator.push<void>(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) => Settings(),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.settings)),
+                    alignment: Alignment.topRight,
+                  ),
                   Text(
                     "Select a category...",
                     style: TextStyle(

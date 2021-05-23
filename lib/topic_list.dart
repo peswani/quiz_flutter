@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:quiz_app/quiz_play.dart';
 import 'package:quiz_app/score_screen.dart';
 import 'package:quiz_app/settings.dart';
+import 'package:quiz_app/video_player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'colorutil.dart';
@@ -137,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     context,
                                     MaterialPageRoute<void>(
                                       builder: (BuildContext context) =>
-                                          QuizScreen(
+                                          VideoApp(
                                         category: categories[index],
                                       ),
                                     ),
